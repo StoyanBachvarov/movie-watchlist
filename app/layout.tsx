@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { getSession } from "@/app/actions/auth";
+import { getSession, logoutUser } from "@/app/actions/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +50,11 @@ export default async function RootLayout({
                 <>
                   <Link href="/dashboard" className="hover:text-black">My Watchlist</Link>
                   <Link href="/profile" className="hover:text-black">Profile</Link>
+                  <form action={logoutUser}>
+                    <button type="submit" className="hover:text-black cursor-pointer">
+                      Logout
+                    </button>
+                  </form>
                 </>
               ) : (
                 <>
