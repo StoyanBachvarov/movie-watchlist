@@ -12,8 +12,8 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "super_secret_jwt_key_that_is_long_enough"
 );
 
-export async function createSession(userId: number, email: string, name: string | null) {
-  const token = await new SignJWT({ userId, email, name })
+export async function createSession(userId: number, email: string, name: string | null, role: string = 'user') {
+  const token = await new SignJWT({ userId, email, name, role })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('24h')
     .sign(JWT_SECRET);
@@ -44,7 +44,7 @@ export async function registerUser(prevState: any, formData: FormData) {
       passwordHash,
     }).returning();
 
-    await createSession(user.id, user.email, user.name);
+    await createSession(user.id, user.email, user.name, user.role);
   } catch (e) {
     console.error(e);
     return { error: "Failed to register. Email might already be in use." };
@@ -74,7 +74,7 @@ export async function loginUser(prevState: any, formData: FormData) {
     return { error: "Invalid credentials" };
   }
 
-  await createSession(user.id, user.email, user.name);
+  await createSession(user.id, user.email, user.name, user.role);
   redirect("/movies");
 }
 
@@ -91,7 +91,7 @@ export async function getSession() {
 
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as { userId: number; email: string; name: string | null };
+    return payload as { userId: number; email: string; name: string | null; role: string };
   } catch {
     return null;
   }

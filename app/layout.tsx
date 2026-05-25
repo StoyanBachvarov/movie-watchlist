@@ -48,6 +48,9 @@ export default async function RootLayout({
             <div className="flex items-center gap-4 text-sm font-medium text-gray-600">
               {isLoggedIn ? (
                 <>
+                  {session.role === 'admin' && (
+                    <Link href="/admin" className="hover:text-black text-red-600 font-semibold">Admin</Link>
+                  )}
                   <Link href="/dashboard" className="hover:text-black">My Watchlist</Link>
                   <Link href="/profile" className="hover:text-black">Profile</Link>
                   <form action={logoutUser}>
