@@ -9,7 +9,7 @@ const JWT_SECRET = new TextEncoder().encode(
 // Define protected paths
 const protectedPaths = ['/dashboard', '/profile', '/admin'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Check if it's a protected route
@@ -34,8 +34,9 @@ export async function middleware(request: NextRequest) {
       
     } catch (e) {
       // Token expired or invalid
-      request.cookies.delete('session');
-      return NextResponse.redirect(new URL('/login', request.url));
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('session');
+      return response;
     }
   }
 
