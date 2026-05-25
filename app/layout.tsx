@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { cookies } from "next/headers";
+import { getSession } from "@/app/actions/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,9 +24,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  // Using a mock auth check for UI layout state 
-  const isLoggedIn = cookieStore.has("session");
+  const session = await getSession();
+  const isLoggedIn = !!session;
 
   return (
     <html
@@ -50,9 +49,7 @@ export default async function RootLayout({
               {isLoggedIn ? (
                 <>
                   <Link href="/dashboard" className="hover:text-black">My Watchlist</Link>
-                  <form action="/api/auth/logout" method="POST">
-                    <button type="submit" className="hover:text-black hover:underline">Logout</button>
-                  </form>
+                  <Link href="/profile" className="hover:text-black">Profile</Link>
                 </>
               ) : (
                 <>

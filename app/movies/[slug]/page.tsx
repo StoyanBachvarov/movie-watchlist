@@ -1,8 +1,10 @@
 import { db } from "@/db";
-import { movies } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { movies, userMovies } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import { getSession } from "@/app/actions/auth";
+import { addToWatchlist } from "@/app/actions/userMovies";
 
 export default async function MovieDetailPage({
   params,
@@ -18,6 +20,23 @@ export default async function MovieDetailPage({
   if (!movie) {
     notFound();
   }
+
+  const session = await getSession();
+  let isInWatchlist = false;
+
+  if (session) {
+    const userId = session.userId;
+    const existing = await db.query.userMovies.findFirst({
+      where: and(
+        eq(userMovies.userId, userId),
+        eq(userMovies.movieId, movie.id)
+      ),
+    });
+    isInWatchlist = !!existing;
+  }
+
+  // Bind the action to the current movie
+  const addAction = addToWatchlist.bind(null, movie.id, movie.slug);
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -60,9 +79,20 @@ export default async function MovieDetailPage({
         </div>
 
         <div className="pt-6 border-t">
-          <button className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition">
-            + Add to Watchlist
-          </button>
+          {isInWatchlist ? (
+            <div className="px-6 py-3 inline-block bg-green-50 text-green-700 border border-green-200 font-medium rounded-lg">
+              ✓ In your Watchlist
+            </div>
+          ) : (
+            <form action={addAction}>
+              <button 
+                type="submit"
+                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition"
+              >
+                + Add to Watchlist
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>
